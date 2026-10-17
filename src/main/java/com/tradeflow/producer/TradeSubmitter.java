@@ -17,8 +17,8 @@ public class TradeSubmitter {
             InitialContext ctx = getContext();
 
             //Looks up ConnectionFactory and the PENDING.TRADES queue
-            ConnectionFactory cf = (ConnectionFactory) ctx.lookup("ConnectionFactory");
-            Queue pendingTrades = getQueue(ctx);
+            ConnectionFactory cf = getConnectionFactory(ctx);
+            Queue pendingTrades = getQueue(ctx, "PENDING.TRADES");
 
             //Creates a Connection → Session → MessageProducer
             try (Connection conn = getConnection(cf)){
@@ -55,8 +55,8 @@ public class TradeSubmitter {
        return JNDIContextFactory.getContext();
     }
 
-    public static Queue getQueue(InitialContext ctx) throws NamingException {
-        return (Queue) ctx.lookup("PENDING.TRADES");
+    public static Queue getQueue(InitialContext ctx, String queue) throws NamingException {
+        return (Queue) ctx.lookup(queue);
     }
 
     public static MessageProducer getProducer(Session session, Queue queue) throws JMSException {
@@ -81,5 +81,10 @@ public class TradeSubmitter {
         msg.setString("symbol", symbol);
 
         return msg;
+    }
+
+    public static ConnectionFactory getConnectionFactory(InitialContext ctx) throws NamingException {
+
+        return (ConnectionFactory) ctx.lookup("ConnectionFactory");
     }
 }
